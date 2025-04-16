@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Classification de cartes</title>
+</head>
+<body>
+    <h1>Classification de cartes</h1>
+
+    <!-- Formulaire d'upload -->
+    <form action="/" method="POST" enctype="multipart/form-data">
+        <label>Choisissez une image :</label>
+        <input type="file" name="file">
+        <button type="submit">Uploader</button>
+    </form>
+
+    <hr>
+
+    <!-- Webcam -->
+    <h3>Ou prenez une photo via la webcam</h3>
+    <video id="video" width="320" height="240" autoplay></video><br>
+    <button id="captureBtn">Capturer</button>
+    <form action="/" method="POST" id="webcamForm">
+        <input type="hidden" name="webcam_image" id="webcam_image">
+        <button type="submit">Envoyer la photo</button>
+    </form>
+
+    <hr>
+    
+    {% if prediction is not none %}
+    <h2>Résultat de la prédiction : {{ prediction }}</h2>
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>
