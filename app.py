@@ -5,6 +5,8 @@ import base64
 from flask import Flask, render_template, request
 from model import load_my_model, preprocess_image, predict_image
 import time
+from flask import jsonify
+
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "uploads"
@@ -44,6 +46,25 @@ def index():
             print(f"✅ Prédiction faite en {time.time() - t0:.2f} sec")
 
     return render_template("index.html", prediction=prediction)
+
+
+@app.route("/predict_webcam_frame", methods=["POST"])
+def predict_webcam_frame():
+    data = request.get_json()
+    if data and "image" in data:
+        image_data = base64.b64decode(data["image"].split(",")[1])
+        filename = "frame.png"
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        with open(filepath, "wb") as f:
+            f.write(image_data)
+
+        tensor_img = preprocess_image(filepath)
+        prediction = predict_image(model, tensor_img)
+
+        return jsonify({"prediction": prediction})
+
+    return jsonify({"error": "no image"}), 400
+
 
 if __name__ == "__main__":
     app.run(debug=True)
