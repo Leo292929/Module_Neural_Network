@@ -52,18 +52,25 @@ def index():
 def predict_webcam_frame():
     data = request.get_json()
     if data and "image" in data:
-        image_data = base64.b64decode(data["image"].split(",")[1])
-        filename = "frame.png"
-        filepath = os.path.join(UPLOAD_FOLDER, filename)
-        with open(filepath, "wb") as f:
-            f.write(image_data)
+        try:
+            image_data = base64.b64decode(data["image"].split(",")[1])
+            if len(image_data) < 1000:
+                return jsonify({"error": "image trop petite"}), 400
 
-        tensor_img = preprocess_image(filepath)
-        prediction = predict_image(model, tensor_img)
+            filepath = os.path.join("uploads", "frame.png")
+            with open(filepath, "wb") as f:
+                f.write(image_data)
 
-        return jsonify({"prediction": prediction})
+            tensor = preprocess_image(filepath)
+            prediction = predict_image(model, tensor)
+
+            return jsonify({"prediction": prediction})
+        except Exception as e:
+            print("Erreur dans la prédiction live :", e)
+            return jsonify({"error": "failed to process image"}), 500
 
     return jsonify({"error": "no image"}), 400
+
 
 
 if __name__ == "__main__":

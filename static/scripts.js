@@ -11,14 +11,18 @@ const predictionText  = document.getElementById('predictionText');
 let stream            = null;          // flux webcam
 let captureIntervalId = null;          // setInterval id
 const CAPTURE_DELAY   = 1000;          // ms entre 2 frames
+const MIN_IMAGE_SIZE  = 1000;          // octets minimum pour éviter les frames vides
 
 /* ----------- Webcam helpers ------------------ */
 async function startWebcam() {
-  if (stream) return;                  // déjà actif
+  if (stream) return; // déjà actif
+
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video: true });
     video.srcObject = stream;
     await video.play();
+
+    // Démarrer les captures régulières
     captureIntervalId = setInterval(captureFrameAndPredict, CAPTURE_DELAY);
   } catch (err) {
     console.error('Webcam error:', err);
@@ -37,12 +41,21 @@ function stopWebcam() {
 }
 
 async function captureFrameAndPredict() {
-  if (!video.videoWidth) return;       // vidéo pas encore prête
+  if (!video.videoWidth || !video.videoHeight) return; // webcam pas encore prête
+
   const canvas = document.createElement('canvas');
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
   const dataURL = canvas.toDataURL('image/png');
+
+  // Vérification basique du contenu
+  if (!dataURL.startsWith('data:image/png;base64,')) return;
+
+  // Optionnel : éviter d'envoyer des images trop petites
+  const base64Data = dataURL.split(',')[1];
+  if (base64Data.length < MIN_IMAGE_SIZE) return;
 
   try {
     const res  = await fetch('/predict_webcam_frame', {
@@ -50,11 +63,18 @@ async function captureFrameAndPredict() {
       headers: { 'Content-Type': 'application/json' },
       body   : JSON.stringify({ image: dataURL })
     });
+
     const data = await res.json();
-    if (data.prediction) predictionText.textContent = data.prediction;
+
+    if (data.prediction) {
+      predictionText.textContent = data.prediction;
+    } else if (data.error) {
+      console.warn('Erreur serveur :', data.error);
+    }
   } catch (err) {
     console.error('Prediction error:', err);
     stopWebcam();
+    alert("Erreur de prédiction. La webcam a été arrêtée.");
   }
 }
 
