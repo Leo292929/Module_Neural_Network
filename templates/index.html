@@ -1,35 +1,164 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Classification de cartes</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Styles maison pour un look moderne sans dépendances externes -->
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #f3f4f6;
+            --text: #111827;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: #f9fafb;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            max-width: 480px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        label {
+            font-weight: 600;
+        }
+
+        input[type="file"] {
+            padding: 0.5rem;
+            background: #ffffff;
+            border: 2px dashed #cbd5e1;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+
+        button {
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            background: var(--primary);
+            color: #ffffff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease-in-out;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #e5e7eb;
+            margin: 2rem 0;
+        }
+
+        video {
+            border-radius: 0.5rem;
+            border: 2px solid #cbd5e1;
+        }
+
+        /* Section webcam centrée */
+        .webcam {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* Form webcam pleine largeur */
+        #webcamForm {
+            width: 100%;
+        }
+
+        /* Boutons webcam pleine largeur et espacés */
+        #captureBtn,
+        #webcamForm button {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        #result {
+            margin-top: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <h1>Classification de cartes</h1>
+    <div class="card">
+        <h1>Classification de cartes</h1>
 
-    <!-- Formulaire d'upload -->
-    <form action="/" method="POST" enctype="multipart/form-data">
-        <label>Choisissez une image :</label>
-        <input type="file" name="file">
-        <button type="submit">Uploader</button>
-    </form>
+        <!-- Formulaire d'upload -->
+        <form action="/" method="POST" enctype="multipart/form-data">
+            <label for="file">Choisissez une image :</label>
+            <input type="file" name="file" id="file" accept="image/*">
+            <button type="submit">Uploader</button>
+        </form>
 
-    <hr>
+        <hr>
 
-    <!-- Webcam -->
-    <h3>Ou prenez une photo via la webcam</h3>
-    <video id="video" width="320" height="240" autoplay></video><br>
-    <button id="captureBtn">Capturer</button>
-    <form action="/" method="POST" id="webcamForm">
-        <input type="hidden" name="webcam_image" id="webcam_image">
-        <button type="submit">Envoyer la photo</button>
-    </form>
+        <!-- Webcam -->
+        <div class="webcam">
+            <h3>Ou prenez une photo via la webcam</h3>
+            <video id="video" width="320" height="240" autoplay></video>
+            <button id="captureBtn">Capturer</button>
+            <form action="/" method="POST" id="webcamForm">
+                <input type="hidden" name="webcam_image" id="webcam_image">
+                <button type="submit">Uploader</button>
+            </form>
+        </div>
 
-    <hr>
-    
-    {% if prediction is not none %}
-    <h2>Résultat de la prédiction : {{ prediction }}</h2>
-    {% endif %}
+        {% if prediction is not none %}
+        <div id="result">Résultat : {{ prediction }}</div>
+        {% endif %}
+    </div>
 
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>
