@@ -22,3 +22,12 @@ captureBtn.addEventListener('click', () => {
   // dataUrl = "data:image/png;base64,iVBORw0K..."
   webcamImageInput.value = dataUrl;
 });
+
+
+// Empêcher l’envoi si aucune image n’a été capturée
+document.getElementById("webcamForm").addEventListener("submit", function(event) {
+  if (!webcamImageInput.value) {
+    event.preventDefault();
+    alert("Veuillez d'abord capturer une image avant d'envoyer.");
+  }
+});
