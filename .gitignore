@@ -1,0 +1,64 @@
+# ----------------------------------------------------------------------
+#  GÉNÉRAL PYTHON
+# ----------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+pip-wheel-metadata/
+*.manifest
+*.spec
+
+# Gestion des environnements virtuels
+venv/
+.env/
+.venv/
+
+# Notebooks Jupyter
+.ipynb_checkpoints/
+
+# ----------------------------------------------------------------------
+#  FICHIERS TEMPORAIRES & LOGS
+# ----------------------------------------------------------------------
+*.log
+*.tmp
+*.temp
+*.cache
+*.sqlite3
+
+# ----------------------------------------------------------------------
+#  ÉDITEURS / IDE
+# ----------------------------------------------------------------------
+.vscode/
+.idea/
+*.sublime-*
+*.code-workspace
+
+# ----------------------------------------------------------------------
+#  OS
+# ----------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+
+# ----------------------------------------------------------------------
+#  PROJET SPÉCIFIQUE (Flask + données)
+# ----------------------------------------------------------------------
+# Dossier où Flask enregistre les uploads reçus
+uploads/
+
+# Si tu ne veux pas versionner les données d’entraînement
+data/
+
+# Modèle entraîné (souvent gros ; on ne le push qu’en release si besoin)
+mon_modele_cartes.pt
+
+# Fichiers d’export / artefacts éventuels
+*.pth
+*.pt
+*.h5
