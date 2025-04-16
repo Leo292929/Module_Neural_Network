@@ -1,49 +1,52 @@
-# model.py
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
+from torchvision import models
 from PIL import Image
 
-class MonReseau(nn.Module):
-    def __init__(self, num_classes=10):
-        super(MonReseau, self).__init__()
-        # Exemple : un petit CNN minimaliste ou un ResNet
-        # ICI on met un module fictif
-        self.conv = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1)
-        self.pool = nn.AdaptiveAvgPool2d((1,1))
-        self.fc = nn.Linear(16, num_classes)
-
-    def forward(self, x):
-        x = self.conv(x)         # [batch, 16, H, W]
-        x = nn.functional.relu(x)
-        x = self.pool(x)         # [batch, 16, 1, 1]
-        x = x.view(x.size(0), -1) # [batch, 16]
-        x = self.fc(x)           # [batch, num_classes]
-        return x
-
-# Charger le modèle
-def load_my_model():
-    # on instance le même réseau que lors de l'entraînement
-    model = MonReseau(num_classes=10)
-    # on charge les poids
-    model.load_state_dict(torch.load("mon_modele_cartes.pt", map_location=torch.device('cpu')))
-    model.eval()  # mode évaluation
-    return model
-
-# Prétraitement de l'image
+# Les mêmes normalisations et resize que dans le script d'entraînement
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
-    transforms.ToTensor()
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406],
+                         [0.229, 0.224, 0.225])
 ])
 
-def preprocess_image(img_path):
-    img = Image.open(img_path).convert("RGB")
-    return transform(img).unsqueeze(0)  # shape [1, 3, 224, 224]
+labels = [  'ace of clubs','ace of diamonds','ace of hearts','ace of spades', 
+            'eight of clubs', 'eight of diamonds', 'eight of hearts','eight of spades', 
+            'five of clubs', 'five of diamonds', 'five of hearts', 'five of spades', 
+            'four of clubs', 'four of diamonds', 'four of hearts', 'four of spades', 
+            'jack of clubs', 'jack of diamonds', 'jack of hearts', 'jack of spades', 
+            'joker',
+            'king of clubs', 'king of diamonds', 'king of hearts', 'king of spades', 
+            'nine of clubs', 'nine of diamonds', 'nine of hearts', 'nine of spades', 
+            'queen of clubs', 'queen of diamonds', 'queen of hearts', 'queen of spades', 
+            'seven of clubs', 'seven of diamonds', 'seven of hearts', 'seven of spades', 
+            'six of clubs',  'six of diamonds', 'six of hearts', 'six of spades', 
+            'ten of clubs', 'ten of diamonds', 'ten of hearts', 'ten of spades', 
+            'three of clubs', 'three of diamonds', 'three of hearts', 'three of spades', 
+            'two of clubs', 'two of diamonds', 'two of hearts', 'two of spades'
+        ]
 
-# Effectuer la prédiction
-def predict_image(model, input_tensor):
-    # input_tensor : shape [1, 3, 224, 224]
+
+def load_my_model():
+    # On reconstruit la même architecture
+    model = models.resnet18(weights=None)  # pas besoin des weights ImageNet
+    model.fc = nn.Linear(model.fc.in_features, len(labels))
+    # Charger le state_dict
+    model.load_state_dict(torch.load("mon_modele_cartes.pt", map_location=torch.device('cpu')))
+    model.eval()
+    return model
+
+def preprocess_image(img_path):
+    # Ou bien on reçoit un objet PIL déjà ouvert
+    img = Image.open(img_path).convert("RGB")
+    img_t = transform(img)
+    return img_t.unsqueeze(0)  # shape [1, 3, 224, 224]
+
+def predict_image(model, tensor_img):
     with torch.no_grad():
-        outputs = model(input_tensor)
-        predicted_class = outputs.argmax(dim=1).item()
-    return predicted_class
+        outputs = model(tensor_img)
+        _, predicted = torch.max(outputs, 1)
+    predicted_idx = predicted.item()  # index de classe (0..51)
+    return labels[predicted_idx]
