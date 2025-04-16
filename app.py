@@ -4,7 +4,7 @@ import uuid
 import base64
 from flask import Flask, render_template, request
 from model import load_my_model, preprocess_image, predict_image
-
+import time
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "uploads"
@@ -39,7 +39,9 @@ def index():
                 f.write(image_data)
 
             tensor_img = preprocess_image(filepath)
+            t0 = time.time()
             prediction = predict_image(model, tensor_img)
+            print(f"✅ Prédiction faite en {time.time() - t0:.2f} sec")
 
     return render_template("index.html", prediction=prediction)
 

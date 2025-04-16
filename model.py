@@ -3,7 +3,7 @@ import torch.nn as nn
 import torchvision.transforms as transforms
 from torchvision import models
 from PIL import Image
-
+import time
 # Les mêmes normalisations et resize que dans le script d'entraînement
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
@@ -29,14 +29,20 @@ labels = [  'ace of clubs','ace of diamonds','ace of hearts','ace of spades',
         ]
 
 
+import time
+
 def load_my_model():
-    # On reconstruit la même architecture
-    model = models.resnet18(weights=None)  # pas besoin des weights ImageNet
+    print("🟡 Chargement du modèle...")
+    t0 = time.time()
+
+    model = models.resnet18(weights=None)
     model.fc = nn.Linear(model.fc.in_features, len(labels))
-    # Charger le state_dict
-    model.load_state_dict(torch.load("mon_modele_cartes.pt", map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load("mon_modele_cartes.pt", map_location="cpu"))
     model.eval()
+
+    print(f"✅ Modèle chargé en {time.time() - t0:.2f} sec")
     return model
+
 
 def preprocess_image(img_path):
     # Ou bien on reçoit un objet PIL déjà ouvert
