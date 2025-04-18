@@ -6,23 +6,21 @@
 const radioUpload     = document.getElementById('radioUpload');
 const radioWebcam     = document.getElementById('radioWebcam');
 const video           = document.getElementById('video');
-const predictionText  = document.getElementById('predictionText');
+const resultImg       = document.getElementById('predictedImg');  // <img> pour image annotée
 
-let stream            = null;          // flux webcam
-let captureIntervalId = null;          // setInterval id
-const CAPTURE_DELAY   = 1000;          // ms entre 2 frames
-const MIN_IMAGE_SIZE  = 1000;          // octets minimum pour éviter les frames vides
+let stream            = null;
+let captureIntervalId = null;
+const CAPTURE_DELAY   = 1000;  // ms
+const MIN_IMAGE_SIZE  = 1000;  // taille minimale en base64
 
 /* ----------- Webcam helpers ------------------ */
 async function startWebcam() {
-  if (stream) return; // déjà actif
+  if (stream) return;
 
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video: true });
     video.srcObject = stream;
     await video.play();
-
-    // Démarrer les captures régulières
     captureIntervalId = setInterval(captureFrameAndPredict, CAPTURE_DELAY);
   } catch (err) {
     console.error('Webcam error:', err);
@@ -40,34 +38,31 @@ function stopWebcam() {
   }
 }
 
+/* ----------- Capture et envoi des frames ------------ */
 async function captureFrameAndPredict() {
-  if (!video.videoWidth || !video.videoHeight) return; // webcam pas encore prête
+  if (!video.videoWidth || !video.videoHeight) return;
 
   const canvas = document.createElement('canvas');
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(video, 0, 0);
+  canvas.getContext('2d').drawImage(video, 0, 0);
   const dataURL = canvas.toDataURL('image/png');
 
-  // Vérification basique du contenu
   if (!dataURL.startsWith('data:image/png;base64,')) return;
-
-  // Optionnel : éviter d'envoyer des images trop petites
   const base64Data = dataURL.split(',')[1];
   if (base64Data.length < MIN_IMAGE_SIZE) return;
 
   try {
-    const res  = await fetch('/predict_webcam_frame', {
-      method : 'POST',
+    const res = await fetch('/predict_webcam_frame', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body   : JSON.stringify({ image: dataURL })
+      body: JSON.stringify({ image: dataURL })
     });
 
     const data = await res.json();
 
-    if (data.prediction) {
-      predictionText.textContent = data.prediction;
+    if (data.image) {
+      resultImg.src = data.image;  // Met à jour l'image annotée
     } else if (data.error) {
       console.warn('Erreur serveur :', data.error);
     }
@@ -80,13 +75,17 @@ async function captureFrameAndPredict() {
 
 /* ----------- Changement de source ------------ */
 function handleSourceChange() {
-  if (radioWebcam.checked) startWebcam();
-  else                     stopWebcam();   // upload sélectionné
+  if (radioWebcam.checked) {
+    startWebcam();
+    resultImg.src = ""; // reset image affichée
+  } else {
+    stopWebcam();
+  }
 }
 
 radioUpload.addEventListener('change', handleSourceChange);
 radioWebcam.addEventListener('change', handleSourceChange);
-window.addEventListener('beforeunload', stopWebcam); // nettoyage
+window.addEventListener('beforeunload', stopWebcam);
 
-// Si la page se recharge avec webcam déjà cochée
+// Auto-start si webcam sélectionnée
 if (radioWebcam.checked) startWebcam();

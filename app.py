@@ -1,52 +1,60 @@
-# app.py
 import os
+import time
 import uuid
 import base64
-from flask import Flask, render_template, request
-from model import load_my_model, preprocess_image, predict_image
-import time
-from flask import jsonify
+from flask import Flask, render_template, request, jsonify
 
-app = Flask(__name__)
+# Nouveau pipeline détection + classification
+from detect_and_classify import detect_and_classify
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-model = load_my_model()
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# ===========================
+# Page principale (upload PC)
+# ===========================
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    prediction = None
+    image_data = None
+
     if request.method == "POST":
-        # 1) upload depuis PC
+        # 1) Upload depuis fichier
         if "file" in request.files:
             file = request.files["file"]
-            if file.filename != "":
+            if file and file.filename != "":
                 filename = str(uuid.uuid4()) + ".png"
                 filepath = os.path.join(UPLOAD_FOLDER, filename)
                 file.save(filepath)
 
-                tensor_img = preprocess_image(filepath)
-                prediction = predict_image(model, tensor_img)
+                print("📁 Image uploadée :", filepath)
 
-        # 2) image webcam (base64)
+                image_data = detect_and_classify(filepath)
+
+        # 2) Upload depuis webcam (base64)
         elif "webcam_image" in request.form:
             data_url = request.form["webcam_image"]
-            # data_url = "data:image/png;base64,...."
-            base64_str = data_url.split(",")[1]
-            image_data = base64.b64decode(base64_str)
-            filename = str(uuid.uuid4()) + ".png"
-            filepath = os.path.join(UPLOAD_FOLDER, filename)
-            with open(filepath, "wb") as f:
-                f.write(image_data)
+            if data_url.startswith("data:image"):
+                base64_str = data_url.split(",")[1]
+                image_data_bytes = base64.b64decode(base64_str)
+                filename = str(uuid.uuid4()) + ".png"
+                filepath = os.path.join(UPLOAD_FOLDER, filename)
+                with open(filepath, "wb") as f:
+                    f.write(image_data_bytes)
 
-            tensor_img = preprocess_image(filepath)
-            t0 = time.time()
-            prediction = predict_image(model, tensor_img)
-            print(f"✅ Prédiction faite en {time.time() - t0:.2f} sec")
+                print("📷 Image capturée depuis webcam :", filepath)
 
-    return render_template("index.html", prediction=prediction)
+                image_data = detect_and_classify(filepath)
 
+    return render_template("index.html", image_data=image_data)
+
+
+# ===========================
+# Route pour capture webcam (JS)
+# ===========================
 
 @app.route("/predict_webcam_frame", methods=["POST"])
 def predict_webcam_frame():
@@ -57,20 +65,21 @@ def predict_webcam_frame():
             if len(image_data) < 1000:
                 return jsonify({"error": "image trop petite"}), 400
 
-            filepath = os.path.join("uploads", "frame.png")
+            filepath = os.path.join(UPLOAD_FOLDER, "frame.png")
             with open(filepath, "wb") as f:
                 f.write(image_data)
 
-            tensor = preprocess_image(filepath)
-            prediction = predict_image(model, tensor)
+            print("📷 Frame reçue pour prédiction live")
 
-            return jsonify({"prediction": prediction})
+            annotated_img = detect_and_classify(filepath)
+
+            return jsonify({"image": annotated_img})
+
         except Exception as e:
-            print("Erreur dans la prédiction live :", e)
+            print("❌ Erreur dans la prédiction live :", e)
             return jsonify({"error": "failed to process image"}), 500
 
     return jsonify({"error": "no image"}), 400
-
 
 
 if __name__ == "__main__":

@@ -54,5 +54,5 @@ def predict_image(model, tensor_img):
     with torch.no_grad():
         outputs = model(tensor_img)
         _, predicted = torch.max(outputs, 1)
-    predicted_idx = predicted.item()  # index de classe (0..51)
-    return labels[predicted_idx]
+    predicted_idx = predicted.item()  # index entre 0 et 51
+    return predicted_idx  # ✅ retourne un INT

@@ -1,182 +1,258 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Classification de cartes</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Classification de cartes</title>
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
 
-    <style>
-        :root {
-            --primary: #4f46e5;
-            --primary-dark: #4338ca;
-            --secondary: #f3f4f6;
-            --text: #111827;
-        }
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --secondary: #f3f4f6;
+      --text: #111827;
+    }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
 
-        body {
-            background: #f9fafb;
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 2rem;
-        }
+    body {
+      background: #f9fafb;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 0;
+      margin: 0;
+    }
 
-        .card {
-            background: #ffffff;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-            padding: 2rem;
-            max-width: 840px;
-            width: 100%;
-        }
+    .card {
+      background: #ffffff;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      width: 95vw;
+      max-width: 1400px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
-        h1 {
-            font-size: 1.75rem;
-            font-weight: 600;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
+    .card-content {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .options {
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
 
-        .option {
-            position: relative;
-            flex: 1 1 320px;
-            background: var(--secondary);
-            border: 2px solid transparent;
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            transition: border-color 0.2s, background 0.2s;
-        }
+    .options {
+      display: flex;
+      gap: 1rem;
+      flex: 1;
+    }
 
-        /* Highlight when selected */
-        .option:has(> input[type="radio"]:checked) {
-            border-color: var(--primary);
-            background: #ffffff;
-        }
+    .option {
+      position: relative;
+      flex: 0.8; /* réduit de ~20% */
+      background: var(--secondary);
+      border: 2px solid transparent;
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+      overflow-y: auto;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
 
-        .option input[type="radio"] {
-            position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
-            width: 1.25rem;
-            height: 1.25rem;
-            cursor: pointer;
-        }
+    .option:has(> input[type="radio"]:checked) {
+      flex: 3; /* agrandit le bloc actif */
+      border-color: var(--primary);
+      background: #ffffff;
+    }
 
-        .option h3 {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
+    .option input[type="radio"] {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      cursor: pointer;
+    }
 
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
+    .option h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      text-align: center;
+      flex: none;
+    }
 
-        input[type="file"] {
-            padding: 0.75rem;
-            border: 2px dashed #cbd5e1;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            background: #ffffff;
-        }
+    /* Upload : formulaire plein bloc */
+    #uploadSection .content {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    #uploadSection .content form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    /* Remet le contour en pointillé autour du fichier et centre le texte */
+    #uploadSection .content form input[type="file"] {
+      width: 100%;
+      padding: 0.5rem;
+      border: 2px dashed #cbd5e1;
+      border-radius: 0.5rem;
+      background: #ffffff;
+      cursor: pointer;
+      text-align: center;
+    }
+    #uploadSection .content form button {
+      width: 100%;
+    }
+    /* Centre et réduit la preview pour correspondre à la webcam */
+    #uploadSection .content .preview-image {
+      width: 50%;
+      height: auto;
+      object-fit: contain;
+      margin: 0 auto;
+      border-radius: 0.5rem;
+      border: 2px solid #cbd5e1;
+    }
 
-        button {
-            padding: 0.75rem;
-            border: none;
-            border-radius: 0.5rem;
-            background: var(--primary);
-            color: #ffffff;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s ease-in-out;
-        }
+    /* Webcam : titre au-dessus + médias côte‑à‑côte plein largeur */
+    #webcamSection .content {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    #webcamSection .content .media {
+      display: flex;
+      gap: 1rem;
+      width: 100%;
+    }
+    #webcamSection .content .media video,
+    #webcamSection .content .media #predictedImg {
+      flex: 1;
+      min-width: 0;
+      width: 100%;
+      margin-top: 0;
+      border-radius: 0.5rem;
+      border: 2px solid #cbd5e1;
+    }
 
-        button:hover {
-            background: var(--primary-dark);
-        }
+    /* Boutons généraux */
+    button {
+      padding: 0.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: var(--primary);
+      color: #ffffff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease-in-out;
+    }
 
-        video {
-            width: 100%;
-            max-width: 100%;
-            border-radius: 0.5rem;
-            border: 2px solid #cbd5e1;
-        }
+    button:hover {
+      background: var(--primary-dark);
+    }
 
-        #result {
-            margin-top: 2rem;
-            font-size: 1.25rem;
-            font-weight: 600;
-            text-align: center;
-        }
+    /* Vidéo & images par défaut */
+    video,
+    img {
+      display: block;
+    }
 
-        @media (max-width: 700px) {
-            .options {
-                flex-direction: column;
-            }
+    #result {
+      margin-top: 1.5rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      text-align: center;
+    }
 
-            .option {
-                flex: 1 1 auto;
-            }
-        }
-    </style>
+    @media (max-width: 768px) {
+      .options {
+        flex-direction: column;
+      }
+      .option {
+        flex: 1 !important;
+      }
+      #webcamSection .content .media,
+      #uploadSection .content {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      #webcamSection .content .media video,
+      #webcamSection .content .media #predictedImg,
+      #uploadSection .content form input[type="file"],
+      #uploadSection .content form button,
+      #uploadSection .content .preview-image {
+        width: 100%;
+        min-width: auto;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="card">
-        <h1>Classification de cartes</h1>
+  <div class="card">
+    <div class="card-content">
+      <h1>Classification de cartes</h1>
 
-        <!-- Choix de la source -->
-        <div class="options">
-            <!-- Upload -->
-            <label class="option" id="uploadSection">
-                <input type="radio" id="radioUpload" name="source" value="upload" checked>
-                <div class="content">
-                    <h3>Uploader une image</h3>
-                    <form action="/" method="POST" enctype="multipart/form-data" id="uploadForm">
-                        <input type="file" name="file" id="fileInput" accept="image/*">
-                        <button type="submit">Envoyer</button>
-                    </form>
-                </div>
-            </label>
+      <div class="options">
+        <!-- Upload -->
+        <label class="option" id="uploadSection">
+          <input type="radio" id="radioUpload" name="source" value="upload" checked />
+          <div class="content">
+            <h3>Uploader une image</h3>
+            <form action="/" method="POST" enctype="multipart/form-data" id="uploadForm">
+              <input type="file" name="file" id="fileInput" accept="image/*" />
+              <button type="submit">Envoyer</button>
+            </form>
+            {% if image_data %}
+              <img src="{{ image_data }}" class="preview-image" />
+            {% endif %}
+          </div>
+        </label>
 
-            <!-- Webcam -->
-            <label class="option" id="webcamSection">
-                <input type="radio" id="radioWebcam" name="source" value="webcam">
-                <div class="content">
-                    <h3>Webcam</h3>
-                    <video id="video" width="320" height="240" autoplay muted></video>
-                    <!-- Vous pouvez ajouter un bouton de capture si nécessaire -->
-                </div>
-            </label>
-        </div>
+        <!-- Webcam -->
+        <label class="option" id="webcamSection">
+          <input type="radio" id="radioWebcam" name="source" value="webcam" />
+          <div class="content">
+            <h3>Webcam</h3>
+            <div class="media">
+              <video id="video" autoplay muted></video>
+              <img id="predictedImg" class="preview-image" />
+            </div>
+          </div>
+        </label>
+      </div>
 
-        <!-- Résultat global -->
-        <div id="result">Résultat : <span id="predictionText">{{ prediction or '...' }}</span></div>
+      <!-- Résultat global -->
+      <div id="result">Résultat : <span id="predictionText">{{ prediction or '...' }}</span></div>
     </div>
+  </div>
 
-    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+  <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>
 </html>
