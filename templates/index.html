@@ -25,8 +25,11 @@
       font-family: 'Inter', sans-serif;
     }
 
+    /* ---------- fond aléatoire ---------- */
     body {
-      background: #f9fafb;
+      background: #f9fafb url("{{ url_for('static',
+                                   filename='assets/' ~ bg_image) }}")
+                   center / cover no-repeat;
       color: var(--text);
       display: flex;
       align-items: center;
@@ -35,9 +38,11 @@
       padding: 0;
       margin: 0;
     }
+    /* ------------------------------------ */
 
     .card {
-      background: #ffffff;
+      background: #ffffffb2;          /* légère transparence pour lire le texte */
+      backdrop-filter: blur(4px);
       border-radius: 1rem;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
       width: 95vw;
@@ -118,7 +123,6 @@
       flex-direction: column;
       gap: 0.75rem;
     }
-    /* Remet le contour en pointillé autour du fichier et centre le texte */
     #uploadSection .content form input[type="file"] {
       width: 100%;
       padding: 0.5rem;
@@ -131,7 +135,6 @@
     #uploadSection .content form button {
       width: 100%;
     }
-    /* Centre et réduit la preview pour correspondre à la webcam */
     #uploadSection .content .preview-image {
       width: 50%;
       height: auto;
@@ -249,7 +252,7 @@
       </div>
 
       <!-- Résultat global -->
-      <div id="result">Résultat : <span id="predictionText">{{ prediction or '...' }}</span></div>
+      <div id="result">Résultat&nbsp;: <span id="predictionText">{{ prediction or '...' }}</span></div>
     </div>
   </div>
 
